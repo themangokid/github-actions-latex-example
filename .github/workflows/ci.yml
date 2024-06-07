@@ -1,0 +1,41 @@
+name: Build
+on:
+  # Run the pipeline on pushed commits
+  push:
+    # Run pipeline only for commits on these branches
+    branches:
+      - 'main'
+      - 'testing/**'
+      - 'feature/**'
+      - 'hotfix/**'
+
+  schedule:
+    # Weekly builds on Monday morning 6:42
+    # Github doc:
+    # "The schedule event can be delayed during periods of high loads of GitHub Actions workflow runs.
+    # High load times include the start of every hour.
+    # To decrease the chance of delay, schedule your workflow to run at a different time of the hour."
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron: '42 6 * * 1'
+
+jobs:
+  # Build the example PDF
+  build-pdf:
+    runs-on: [ubuntu-22.04]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Docker setup
+        run: |
+          docker pull maxkratz/texlive:2024
+      - name: LaTeX compile
+        run: |
+          echo "Starting LaTeX compiling"
+          docker run --rm -v $PWD:/data maxkratz/texlive:2024 latexmk -pdflatex -interaction=nonstopmode
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: document
+          path: |
+            main.pdf
+            main.log
