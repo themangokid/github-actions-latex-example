@@ -1,4 +1,4 @@
-name: Build LaTeX SRB-NT
+name: Build Webpage + PDF
 
 on: [push, pull_request]
 
@@ -17,8 +17,21 @@ jobs:
           latexmk_use_xelatex: true
           post_compile: "latexmk -c"
 
-      - name: Upload PDF
+      - name: Upload PDF as artifact
         uses: actions/upload-artifact@v4
         with:
           name: compiled-pdf
           path: main.pdf
+
+      - name: Prepare GitHub Pages content
+        run: |
+          mkdir -p output
+          cp main.pdf output/srb-bibeln.pdf
+          cp index.html output/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
