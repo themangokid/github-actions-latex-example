@@ -1,20 +1,213 @@
 \documentclass{article}
-\usepackage{graphicx} % Required for inserting images
+\usepackage[protrusion=true,expansion=false]{microtype}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{geometry}
+\usepackage{lettrine}
+\usepackage{fontspec}
+\usepackage{catchfile}
+\usepackage{xstring}  
+\usepackage{multicol}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{pgffor}
+\usepackage{inputenc}
+\usepackage[none]{hyphenat}
+\usepackage{adjustbox}
+\usepackage[table,xcdraw,svgnames]{xcolor}
+\usepackage{pagecolor}
+\usepackage{changepage}    % Fix for microtype (XeTeX limitation) % Add changepage package for adjustwidth
+\usepackage[               % --- Hyperref (for clickable links in TOC) ---
+    bookmarks=true,
+    colorlinks=true,       % or false if you don't want colored links
+    linkcolor=titlecolor,  % color of links
+    urlcolor=titlecolor,
+    citecolor=titlecolor
+]{hyperref}
 
-\title{My \LaTeX~Document}
-\author{Maximilian Kratz}
-\date{June 2024}
 
+% -- Define Colors --
+\definecolor{oldpaper}{RGB}{250, 240, 210} % antique yellowish-orange background
+\definecolor{textcolor}{RGB}{0, 0, 0}      % Totally black text (R = 100 for cool dark red text)
+\definecolor{titlecolor}{RGB}{90, 50, 30}  % deep brown for titles
+
+% Apply it to TOC page numbers
+\definecolor{TOCPageNumber}{RGB}{90, 50, 30}
+
+\renewcommand{\cftsecpagefont}{\color{TOCPageNumber}}
+\renewcommand{\cftsubsecpagefont}{\color{TOCPageNumber}}
+\renewcommand{\cftsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+
+% For bold on the TOC chapter dividers
+\renewcommand{\cftsecfont}{\bfseries\addfontfeatures{FakeBold=1.11}}
+\renewcommand{\cftsecpagefont}{\bfseries\addfontfeatures{FakeBold=1.11}}
+\renewcommand{\cftsecfont}{\bfseries\addfontfeatures{FakeBold=1.11}\color{titlecolor}}
+\renewcommand{\cftsecpagefont}{\bfseries\addfontfeatures{FakeBold=1.11}\color{TOCPageNumber}}
+\renewcommand{\cftsubsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+
+% --- Backwards button
+\newcommand{\backtotoc}{%
+  \vspace{2em}
+  {\centering\small \hyperlink{TOC}{\color{titlecolor}Tillbaka}\par}
+}
+
+% -- Font Settings --
+\setmainfont{EB Garamond} % Default font
+% Note: The bold is not very noticeable, set it to 9 to see a big difference
+\setmainfont[UprightFeatures={FakeBold=1.11}]{EB Garamond} % Fake bold added, DEFAULT: 1.1
+
+
+% -- Page Color & Text Color --
+\pagecolor{oldpaper}
+\color{textcolor}
+
+% Controls margins
+\geometry{
+  paperwidth=6.5in,  % Width DEFAULT: 6
+  paperheight=9.5in,   % Height DEFAULT: 9
+  top=1in,
+  bottom=1in,
+  left=0.75in,
+  right=0.75in
+}
+
+% -- Layout for Readability --
+\geometry{top=3cm, bottom=3cm, left=3cm, right=3cm}
+
+% Font Size DEFAULT: 16, 20
+\renewcommand{\normalsize}{\fontsize{16pt}{20pt}\selectfont} 
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0em}
+
+\setstretch{1.05}
+\sloppy
+\hyphenpenalty=1000
+
+% -- Title Formatting --
+\titleformat{\section}{\centering\Huge\bfseries\color{titlecolor}\scshape}{\thesection}{1em}{}
+\titleformat{\subsection}{\centering\Large\bfseries\itshape\color{titlecolor}}{\thesubsection}{1em}{}
+
+% --- VERSE NUMBERS ---
+\newcommand{\versenumber}[1]{%
+  \makebox[0pt][l]{\raisebox{1.30ex}{\hspace{-0.07em}\textcolor{black}{\fontsize{8.5pt}{7pt}\selectfont #1}}}%
+}
+  \ExplSyntaxOn
+\NewDocumentCommand{\RenderVersesFromTextFile}{mm}
+ {
+   \section*{#2}
+   \phantomsection\addcontentsline{toc}{section}{#2}
+   \newcounter{verse}
+   \ior_open:Nn \l_tmpa_ior {#1}
+   \ior_map_inline:Nn \l_tmpa_ior
+    {
+      \stepcounter{verse}
+      \versenumber{\theverse}~##1\ %
+    }
+   \ior_close:N \l_tmpa_ior
+   \par\vspace{1cm}
+ }
+\ExplSyntaxOff
+
+\newcommand{\ProcessAndRenderFile}[3][]{%
+  % 1) Read the entire file into \temptext
+  \CatchFileDef{\temptext}{#2}{}%
+  % 2) Extract the very first letter
+  \StrLeft{\temptext}{1}[\firstletter]%
+  % 3) Remove that first letter from the text
+  \StrGobbleLeft{\temptext}{1}[\resttemp]%
+  % 4) Split \resttemp into first word + remainder
+  \StrBefore{\resttemp}{ }[\firstword]%
+  \StrBehind{\resttemp}{ }[\remainingtext]%
+  % -- Add entry to the TOC using the optional argument if provided;
+  %    otherwise, fallback to the heading text (#3):
+  \phantomsection
+  \addcontentsline{toc}{subsection}{\ifx&#1&\relax\protect\mbox{#3}\else\protect\mbox{#1}\fi}%
+  % -- Print the actual heading in the document as HUGE with line breaks, etc.:
+  \subsection*{\huge #3}%
+  \vspace{1em}
+  % -- If first letter is "J", use custom lettrine settings; otherwise use default:
+  \IfStrEq{\firstletter}{J}{%
+    \lettrine[loversize=0.21, lines=3, lraise=0.22]{\firstletter}{\textsc{\firstword}} \remainingtext
+  }{%
+    \lettrine[loversize=0.3, lines=3, lraise=0.01]{\firstletter}{\textsc{\firstword}} \remainingtext
+  }%
+  \par
+  \vspace{1cm}
+  \backtotoc
+}
+
+%--- TOC Invisible sections ---
+\newcommand{\invisiblesection}[1]{%
+  \phantomsection
+  \addcontentsline{toc}{section}{\textbf{#1}}%
+}
+
+% -------------------------------------------------------------------------
+% DOCUMENT START
+% -------------------------------------------------------------------------
 \begin{document}
+\input{front-page/title_text_nya_testamentet}
+\input{front-page/icons_low_quality}
+\newpage
 
-\maketitle
+% --- Produce a "nice" table of contents (clickable if using hyperref)
+\renewcommand{\contentsname}{\LARGE }
+    \begin{multicols*}{2}
+    \setlength{\columnseprule}{0pt}
+    \setlength{\columnsep}{15pt}
+    \renewcommand{\cftsubsecafterpnum}{\vskip1pt} % small space between entries
+    \setlength{\cftbeforesecskip}{0pt}
+    \setlength{\cftbeforesubsecskip}{1pt}
+    \renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+    \renewcommand{\cftsubsecfont}{\normalfont}
+    \renewcommand{\cftsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+    {\fontsize{10pt}{11.5pt}\selectfont
+    \phantomsection
+    \hypertarget{TOC}{}
+    \tableofcontents
+    }
+\end{multicols*}
+\newpage
 
-\section{Introduction}
-This is a new line.
-This is a new line.
-This is a new line.
-This is a new line.
-This is a new line.
-This is a new line.
+% --- NYA TESTAMENTET ---
+% Add a if-statement for
+% black/white version
+% color version
+% different sizes
+% seriebibeln
+% development version
+% utan bilder och framsida
+% med högre kvalitetsbilder
+
+
+
+\input{render/NT/matteus}
+\input{render/NT/markus}
+\input{render/NT/lukas}
+\input{render/NT/johannes}
+\input{render/NT/apostlagärningarna}
+\input{render/NT/romarbrevet}
+\input{render/NT/första_korinthierbrevet}
+\input{render/NT/andra_korithierbrevet}
+\input{render/NT/galatierbrevet}
+\input{render/NT/efesierbrevet}
+\input{render/NT/filipperbrevet}
+\input{render/NT/kolosserbrevet}
+\input{render/NT/första_thesselonikerbrevet}
+\input{render/NT/andra_thesselonikerbrevet}
+\input{render/NT/första_timotheosbrevet}
+\input{render/NT/andra_timotheosbrevet}
+\input{render/NT/titus}
+\input{render/NT/filemonbrevet}
+\input{render/NT/hebreerbrevet}
+\input{render/NT/jakob}
+\input{render/NT/första_petrus}
+\input{render/NT/andra_petrusbrevet}
+\input{render/NT/första_johannesbrev}
+\input{render/NT/andra_johannesbrev}
+\input{render/NT/tredje_johannes_brev}
+\input{render/NT/judasbrev}
+\input{render/NT/uppenbarelseboken}
 
 \end{document}
