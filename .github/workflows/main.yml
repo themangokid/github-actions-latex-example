@@ -10,13 +10,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile LaTeX document
+      - name: Compile LaTeX document with XeLaTeX
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: main.tex  # Change this to your actual .tex file name
+          root_file: main.tex
+          latexmk_use_xelatex: true
+          post_compile: "latexmk -c"
 
-      - name: Upload PDF as artifact
+      - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
           name: compiled-pdf
-          path: main.pdf  # Must match your root_file name but with .pdf
+          path: main.pdf
