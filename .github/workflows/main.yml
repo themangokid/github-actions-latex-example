@@ -14,7 +14,7 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: main.tex
-          args: -xelatex
+          latexmk_use_xelatex: true
           post_compile: "latexmk -c"
 
       - name: Upload PDF
