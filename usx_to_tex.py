@@ -150,6 +150,7 @@ def load_config():
 def escape_tex(text):
     if not text:
         return ""
+    text = text.replace(" ", " ")  # narrow no-break space not in EB Garamond
     text = text.replace("%", "\\%")
     text = text.replace("$", "\\$")
     text = text.replace("#", "\\#")
