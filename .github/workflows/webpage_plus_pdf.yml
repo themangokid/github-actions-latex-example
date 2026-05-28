@@ -32,9 +32,6 @@ jobs:
           root_file: compile/${{ matrix.book }}.tex
           latexmk_use_xelatex: true
 
-      - name: Move PDF to workspace root
-        run: mv compile/${{ matrix.book }}.pdf ${{ matrix.book }}.pdf
-
       - name: Upload ${{ matrix.book }} PDF
         uses: actions/upload-artifact@v4
         with:
