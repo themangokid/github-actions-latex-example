@@ -32,17 +32,11 @@ jobs:
           latexmk_use_xelatex: true
           post_compile: "latexmk -c"
 
-      - name: Stage PDF for upload
-        run: |
-          PDF=$(find . -maxdepth 2 -name "${{ matrix.book }}.pdf" | head -1)
-          echo "Found PDF: $PDF"
-          cp "$PDF" "${{ matrix.book }}.pdf"
-
       - name: Upload ${{ matrix.book }} PDF
         uses: actions/upload-artifact@v4
         with:
           name: book-${{ matrix.book }}
-          path: ${{ matrix.book }}.pdf
+          path: compile/${{ matrix.book }}.pdf
 
   merge_pdf:
     runs-on: ubuntu-latest
@@ -62,24 +56,25 @@ jobs:
       - name: Merge PDFs in canonical order
         run: |
           sudo apt-get install -y poppler-utils
+          ls pdfs/compile/ || { echo "ERROR: pdfs/compile/ missing"; ls pdfs/ ; exit 1; }
           pdfunite \
-            pdfs/GEN.pdf pdfs/EXO.pdf pdfs/LEV.pdf pdfs/NUM.pdf pdfs/DEU.pdf \
-            pdfs/JOS.pdf pdfs/JDG.pdf pdfs/RUT.pdf \
-            pdfs/1SA.pdf pdfs/2SA.pdf pdfs/1KI.pdf pdfs/2KI.pdf \
-            pdfs/1CH.pdf pdfs/2CH.pdf pdfs/EZR.pdf pdfs/NEH.pdf \
-            pdfs/EST.pdf pdfs/JOB.pdf pdfs/PSA.pdf pdfs/PRO.pdf \
-            pdfs/ECC.pdf pdfs/SNG.pdf pdfs/ISA.pdf pdfs/JER.pdf \
-            pdfs/LAM.pdf pdfs/EZK.pdf pdfs/DAN.pdf pdfs/HOS.pdf \
-            pdfs/JOL.pdf pdfs/AMO.pdf pdfs/OBA.pdf pdfs/JON.pdf \
-            pdfs/MIC.pdf pdfs/NAM.pdf pdfs/HAB.pdf pdfs/ZEP.pdf \
-            pdfs/HAG.pdf pdfs/ZEC.pdf pdfs/MAL.pdf \
-            pdfs/MAT.pdf pdfs/MRK.pdf pdfs/LUK.pdf pdfs/JHN.pdf \
-            pdfs/ACT.pdf pdfs/ROM.pdf pdfs/1CO.pdf pdfs/2CO.pdf \
-            pdfs/GAL.pdf pdfs/EPH.pdf pdfs/PHP.pdf pdfs/COL.pdf \
-            pdfs/1TH.pdf pdfs/2TH.pdf pdfs/1TI.pdf pdfs/2TI.pdf \
-            pdfs/TIT.pdf pdfs/PHM.pdf pdfs/HEB.pdf pdfs/JAS.pdf \
-            pdfs/1PE.pdf pdfs/2PE.pdf pdfs/1JN.pdf pdfs/2JN.pdf \
-            pdfs/3JN.pdf pdfs/JUD.pdf pdfs/REV.pdf \
+            pdfs/compile/GEN.pdf pdfs/compile/EXO.pdf pdfs/compile/LEV.pdf pdfs/compile/NUM.pdf pdfs/compile/DEU.pdf \
+            pdfs/compile/JOS.pdf pdfs/compile/JDG.pdf pdfs/compile/RUT.pdf \
+            pdfs/compile/1SA.pdf pdfs/compile/2SA.pdf pdfs/compile/1KI.pdf pdfs/compile/2KI.pdf \
+            pdfs/compile/1CH.pdf pdfs/compile/2CH.pdf pdfs/compile/EZR.pdf pdfs/compile/NEH.pdf \
+            pdfs/compile/EST.pdf pdfs/compile/JOB.pdf pdfs/compile/PSA.pdf pdfs/compile/PRO.pdf \
+            pdfs/compile/ECC.pdf pdfs/compile/SNG.pdf pdfs/compile/ISA.pdf pdfs/compile/JER.pdf \
+            pdfs/compile/LAM.pdf pdfs/compile/EZK.pdf pdfs/compile/DAN.pdf pdfs/compile/HOS.pdf \
+            pdfs/compile/JOL.pdf pdfs/compile/AMO.pdf pdfs/compile/OBA.pdf pdfs/compile/JON.pdf \
+            pdfs/compile/MIC.pdf pdfs/compile/NAM.pdf pdfs/compile/HAB.pdf pdfs/compile/ZEP.pdf \
+            pdfs/compile/HAG.pdf pdfs/compile/ZEC.pdf pdfs/compile/MAL.pdf \
+            pdfs/compile/MAT.pdf pdfs/compile/MRK.pdf pdfs/compile/LUK.pdf pdfs/compile/JHN.pdf \
+            pdfs/compile/ACT.pdf pdfs/compile/ROM.pdf pdfs/compile/1CO.pdf pdfs/compile/2CO.pdf \
+            pdfs/compile/GAL.pdf pdfs/compile/EPH.pdf pdfs/compile/PHP.pdf pdfs/compile/COL.pdf \
+            pdfs/compile/1TH.pdf pdfs/compile/2TH.pdf pdfs/compile/1TI.pdf pdfs/compile/2TI.pdf \
+            pdfs/compile/TIT.pdf pdfs/compile/PHM.pdf pdfs/compile/HEB.pdf pdfs/compile/JAS.pdf \
+            pdfs/compile/1PE.pdf pdfs/compile/2PE.pdf pdfs/compile/1JN.pdf pdfs/compile/2JN.pdf \
+            pdfs/compile/3JN.pdf pdfs/compile/JUD.pdf pdfs/compile/REV.pdf \
             srb-bibeln.pdf
 
       - name: Upload merged Bible PDF
