@@ -1,0 +1,16 @@
+{
+  "features": {
+    "added_text_highlight": true,
+    "verse_numbers":        false,
+    "section_headings":     false,
+    "footnotes":            false,
+    "cross_references":     false
+  },
+
+  "added_text_color_rgb": [125, 120, 105],
+
+  "preview": {
+    "books":              ["GEN", "MAT"],
+    "chapters_per_book":  5
+  }
+}
