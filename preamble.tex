@@ -1,0 +1,178 @@
+\documentclass{article}
+\usepackage[protrusion=true,expansion=false]{microtype}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{geometry}
+\usepackage{lettrine}
+\usepackage{fontspec}
+\usepackage{polyglossia}        % Swedish hyphenation patterns
+\setmainlanguage{swedish}
+\usepackage{catchfile}
+\usepackage{xstring}
+\usepackage{multicol}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage[table,xcdraw,svgnames]{xcolor}
+\usepackage{pagecolor}
+\usepackage{changepage}    % Fix for microtype (XeTeX limitation) % Add changepage package for adjustwidth
+\usepackage[               % --- Hyperref (for clickable links in TOC) ---
+    bookmarks=true,
+    colorlinks=true,       % or false if you don't want colored links
+    linkcolor=titlecolor,  % color of links
+    urlcolor=titlecolor,
+    citecolor=titlecolor
+]{hyperref}
+
+
+%%% TYPSNITT SOM SER BRA UT :   font-family: 'Averia Serif Libre', cursive;
+
+
+\usepackage{ragged2e}
+\justifying  % Makes all text justified by default
+
+% -- DEV AREA --
+\newcommand{\outlineonlysection}[1]{%
+  \section*{}% nothing shows in PDF
+  \section{#1}% temporarily uncomment to get outline entry
+}
+
+
+% -- Define Colors -- (\sub)
+\definecolor{oldpaper}{RGB}{250, 240, 210} % antique yellowish-orange background
+\definecolor{textcolor}{RGB}{0, 0, 0}      % Totally black text (R = 100 for cool dark red text)
+\definecolor{titlecolor}{RGB}{90, 50, 30}  % deep brown for titles
+% Feature colors and commands — auto-generated from usx_config.json
+\input{srb_config}
+
+% Apply it to TOC page numbers
+\definecolor{TOCPageNumber}{RGB}{90, 50, 30}
+
+\renewcommand{\cftsecpagefont}{\color{TOCPageNumber}}
+\renewcommand{\cftsubsecpagefont}{\color{TOCPageNumber}}
+\renewcommand{\cftsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+
+% For bold on the TOC chapter dividers
+\renewcommand{\cftsecfont}{\bfseries\addfontfeatures{FakeBold=1.11}}
+\renewcommand{\cftsecpagefont}{\bfseries\addfontfeatures{FakeBold=1.11}}
+\renewcommand{\cftsecfont}{\bfseries\addfontfeatures{FakeBold=1.11}\color{titlecolor}}
+\renewcommand{\cftsecpagefont}{\bfseries\addfontfeatures{FakeBold=1.11}\color{TOCPageNumber}}
+\renewcommand{\cftsubsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+
+% --- Backwards button
+\newcommand{\backtotoc}{%
+  \vspace{2em}
+  {\centering \fontsize{12.2}{12.2} \selectfont \hyperlink{TOC}{\color{titlecolor} Tillbaka }\par}
+
+}
+
+% -- Font Settings --
+\setmainfont{EB Garamond} % Default font
+% Note: The bold is not very noticeable, set it to 9 to see a big difference
+\setmainfont[UprightFeatures={FakeBold=1.12}]{EB Garamond} % Fake bold added, DEFAULT: 1.1
+
+
+% -- Page Color & Text Color --
+\pagecolor{oldpaper}
+\color{textcolor}
+
+% Font Size, indent, paragraph spacing (geometry is set in the mobile/print block below)
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0em}
+
+% Prevent orphan lines (single line at bottom) and widow lines (single line at top)
+\widowpenalty=10000
+\clubpenalty=10000
+
+\setstretch{1.15}
+\sloppy
+\hyphenpenalty=75
+
+% -- Title Formatting --
+\titleformat{\section}{\centering\Huge\bfseries\color{titlecolor}\scshape}{\thesection}{1em}{}
+\titleformat{\subsection}{\centering\Large\bfseries\itshape\color{titlecolor}}{\thesubsection}{1em}{}
+
+% --- VERSE NUMBERS ---
+\newcommand{\versenumber}[1]{%
+  \makebox[0pt][l]{\raisebox{1.30ex}{\hspace{-0.07em}\textcolor{black}{\fontsize{8.5pt}{7pt}\selectfont #1}}}%
+}
+  \ExplSyntaxOn
+\NewDocumentCommand{\RenderVersesFromTextFile}{mm}
+ {
+   \section*{#2}
+   \phantomsection\addcontentsline{toc}{section}{#2}
+   \newcounter{verse}
+   \ior_open:Nn \l_tmpa_ior {#1}
+   \ior_map_inline:Nn \l_tmpa_ior
+    {
+      \stepcounter{verse}
+      \versenumber{\theverse}~##1\ %
+    }
+   \ior_close:N \l_tmpa_ior
+   \par\vspace{1cm}
+ }
+\ExplSyntaxOff
+
+\newcommand{\ProcessAndRenderFile}[3][]{%
+  % 1) Read the entire file into \temptext
+  \CatchFileDef{\temptext}{#2}{}%
+  % 2) Extract the very first letter
+  \StrLeft{\temptext}{1}[\firstletter]%
+  % 3) Remove that first letter from the text
+  \StrGobbleLeft{\temptext}{1}[\resttemp]%
+  % 4) Split \resttemp into first word + remainder
+  \StrBefore{\resttemp}{ }[\firstword]%
+  \StrBehind{\resttemp}{ }[\remainingtext]%
+  % -- Add entry to the TOC using the optional argument if provided;
+  %    otherwise, fallback to the heading text (#3):
+  \phantomsection
+  \addcontentsline{toc}{subsection}{\ifx&#1&\relax\protect\mbox{#3}\else\protect\mbox{#1}\fi}%
+  % -- Print the actual heading in the document as HUGE with line breaks, etc.:
+  \subsection*{\huge #3}%
+  \vspace{1em}
+  % -- If first letter is "J", use custom lettrine settings; otherwise use default:
+  % Original settings: 0.21 on J and 0.3 on the rest
+  \IfStrEq{\firstletter}{J}{%
+    \lettrine[loversize=0.21, lines=3, lraise=0.22]{\firstletter}{\textsc{\firstword}} \remainingtext
+  }{%
+    \lettrine[loversize=0.3, lines=3, lraise=0.01]{\firstletter}{\textsc{\firstword}} \remainingtext
+  }%
+  \par
+  \vspace{1cm}
+  % \backtotoc % TILLBAKA-KNAPPEN FINNS HÄR
+}
+
+%--- TOC Invisible sections ---
+\newcommand{\invisiblesection}[1]{%
+  \phantomsection
+  \addcontentsline{toc}{section}{\textbf{#1}}%
+}
+% NEW STUFF CAN BE REMOVED.
+% Uncomment this line to enable mobile formatting
+\newif\ifmobilelayout
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% =======>>>>>>> MOBILE VERSION ACTIVATE HERE
+\mobilelayoutfalse
+
+\ifmobilelayout
+  \geometry{
+    paperwidth=4in,
+    paperheight=7in,
+    top=0.5cm,
+    bottom=0.5cm,
+    left=0.6cm,
+    right=0.6cm
+  }
+  \renewcommand{\normalsize}{\fontsize{15pt}{20pt}\selectfont}
+\else
+  \geometry{
+    paperwidth=7.7in,
+    paperheight=9.5in,
+    top=3cm,
+    bottom=3cm,
+    left=3cm,
+    right=3cm,
+  }
+  \renewcommand{\normalsize}{\fontsize{13pt}{18pt}\selectfont}
+\fi

@@ -3,30 +3,89 @@ name: Build Webpage + PDF
 on: [push, pull_request]
 
 jobs:
-  build_latex:
+  build_book:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        book: [
+          GEN, EXO, LEV, NUM, DEU, JOS, JDG, RUT,
+          1SA, 2SA, 1KI, 2KI, 1CH, 2CH, EZR, NEH,
+          EST, JOB, PSA, PRO, ECC, SNG, ISA, JER,
+          LAM, EZK, DAN, HOS, JOL, AMO, OBA, JON,
+          MIC, NAM, HAB, ZEP, HAG, ZEC, MAL,
+          MAT, MRK, LUK, JHN, ACT, ROM, 1CO, 2CO,
+          GAL, EPH, PHP, COL, 1TH, 2TH, 1TI, 2TI,
+          TIT, PHM, HEB, JAS, 1PE, 2PE, 1JN, 2JN,
+          3JN, JUD, REV
+        ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile LaTeX document with XeLaTeX
+      - name: Compile ${{ matrix.book }}
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: main.tex
+          root_file: compile/${{ matrix.book }}.tex
+          working_directory: .
           latexmk_use_xelatex: true
           post_compile: "latexmk -c"
 
-      - name: Upload PDF as artifact
+      - name: Upload ${{ matrix.book }} PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-${{ matrix.book }}
+          path: compile/${{ matrix.book }}.pdf
+
+  merge_pdf:
+    runs-on: ubuntu-latest
+    needs: build_book
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all book PDFs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: book-*
+          path: pdfs
+          merge-multiple: true
+
+      - name: Merge PDFs in canonical order
+        run: |
+          sudo apt-get install -y poppler-utils
+          pdfunite \
+            pdfs/GEN.pdf pdfs/EXO.pdf pdfs/LEV.pdf pdfs/NUM.pdf pdfs/DEU.pdf \
+            pdfs/JOS.pdf pdfs/JDG.pdf pdfs/RUT.pdf \
+            pdfs/1SA.pdf pdfs/2SA.pdf pdfs/1KI.pdf pdfs/2KI.pdf \
+            pdfs/1CH.pdf pdfs/2CH.pdf pdfs/EZR.pdf pdfs/NEH.pdf \
+            pdfs/EST.pdf pdfs/JOB.pdf pdfs/PSA.pdf pdfs/PRO.pdf \
+            pdfs/ECC.pdf pdfs/SNG.pdf pdfs/ISA.pdf pdfs/JER.pdf \
+            pdfs/LAM.pdf pdfs/EZK.pdf pdfs/DAN.pdf pdfs/HOS.pdf \
+            pdfs/JOL.pdf pdfs/AMO.pdf pdfs/OBA.pdf pdfs/JON.pdf \
+            pdfs/MIC.pdf pdfs/NAM.pdf pdfs/HAB.pdf pdfs/ZEP.pdf \
+            pdfs/HAG.pdf pdfs/ZEC.pdf pdfs/MAL.pdf \
+            pdfs/MAT.pdf pdfs/MRK.pdf pdfs/LUK.pdf pdfs/JHN.pdf \
+            pdfs/ACT.pdf pdfs/ROM.pdf pdfs/1CO.pdf pdfs/2CO.pdf \
+            pdfs/GAL.pdf pdfs/EPH.pdf pdfs/PHP.pdf pdfs/COL.pdf \
+            pdfs/1TH.pdf pdfs/2TH.pdf pdfs/1TI.pdf pdfs/2TI.pdf \
+            pdfs/TIT.pdf pdfs/PHM.pdf pdfs/HEB.pdf pdfs/JAS.pdf \
+            pdfs/1PE.pdf pdfs/2PE.pdf pdfs/1JN.pdf pdfs/2JN.pdf \
+            pdfs/3JN.pdf pdfs/JUD.pdf pdfs/REV.pdf \
+            srb-bibeln.pdf
+
+      - name: Upload merged Bible PDF
         uses: actions/upload-artifact@v4
         with:
           name: compiled-pdf
-          path: main.pdf
+          path: srb-bibeln.pdf
 
       - name: Prepare GitHub Pages content
         run: |
           mkdir -p output
-          cp main.pdf output/srb-bibeln.pdf
+          cp srb-bibeln.pdf output/srb-bibeln.pdf
           cp index.html output/index.html
 
       - name: Deploy to GitHub Pages
