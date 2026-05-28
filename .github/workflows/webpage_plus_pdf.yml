@@ -26,9 +26,10 @@ jobs:
 
       - name: Compile ${{ matrix.book }}
         uses: xu-cheng/latex-action@v3
+        env:
+          TEXINPUTS: "..::"
         with:
           root_file: compile/${{ matrix.book }}.tex
-          working_directory: .
           latexmk_use_xelatex: true
           post_compile: "latexmk -c"
 
