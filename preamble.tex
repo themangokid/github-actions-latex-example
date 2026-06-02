@@ -134,9 +134,9 @@
   % -- If first letter is "J", use custom lettrine settings; otherwise use default:
   % Original settings: 0.21 on J and 0.3 on the rest
   \IfStrEq{\firstletter}{J}{%
-    \lettrine[loversize=0.21, lines=3, lraise=0.22]{\firstletter}{\textsc{\firstword}} \remainingtext
+    \lettrine[loversize=0.21, lines=3, lraise=0.22]{\firstletter}{\MakeUppercase{\firstword}} \remainingtext
   }{%
-    \lettrine[loversize=0.3, lines=3, lraise=0.01]{\firstletter}{\textsc{\firstword}} \remainingtext
+    \lettrine[loversize=0.3, lines=3, lraise=0.01]{\firstletter}{\MakeUppercase{\firstword}} \remainingtext
   }%
   \par
   \vspace{1cm}
