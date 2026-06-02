@@ -82,16 +82,3 @@ jobs:
         with:
           name: compiled-pdf
           path: srb-bibeln.pdf
-
-      - name: Prepare GitHub Pages content
-        run: |
-          mkdir -p output
-          cp srb-bibeln.pdf output/srb-bibeln.pdf
-          cp index.html output/index.html
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/main'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./output

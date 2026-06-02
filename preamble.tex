@@ -38,6 +38,13 @@
 }
 
 
+% --- Feature flags (values set in render_config.tex) ---
+\newif\ifmobilelayout
+\newif\ifwhitebg
+\newif\ifshowbackbutton
+\newif\ifshowtoc
+\input{render_config}
+
 % -- Define Colors -- (\sub)
 \definecolor{oldpaper}{RGB}{250, 240, 210} % antique yellowish-orange background
 \definecolor{textcolor}{RGB}{0, 0, 0}      % Totally black text (R = 100 for cool dark red text)
@@ -74,7 +81,7 @@
 
 
 % -- Page Color & Text Color --
-\pagecolor{oldpaper}
+\ifwhitebg\pagecolor{white}\else\pagecolor{oldpaper}\fi
 \color{textcolor}
 
 % Font Size, indent, paragraph spacing (geometry is set in the mobile/print block below)
@@ -140,7 +147,7 @@
   }%
   \par
   \vspace{1cm}
-  % \backtotoc % TILLBAKA-KNAPPEN FINNS HÄR
+  \ifshowbackbutton\backtotoc\fi
 }
 
 %--- TOC Invisible sections ---
@@ -148,13 +155,6 @@
   \phantomsection
   \addcontentsline{toc}{section}{\textbf{#1}}%
 }
-% NEW STUFF CAN BE REMOVED.
-% Uncomment this line to enable mobile formatting
-\newif\ifmobilelayout
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% =======>>>>>>> MOBILE VERSION ACTIVATE HERE
-\mobilelayouttrue
-
 \ifmobilelayout
   \geometry{
     paperwidth=4in,
