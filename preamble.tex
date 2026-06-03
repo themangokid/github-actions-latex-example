@@ -5,8 +5,6 @@
 \usepackage{geometry}
 \usepackage{lettrine}
 \usepackage{fontspec}
-\usepackage{polyglossia}        % Swedish hyphenation patterns
-\setmainlanguage{swedish}
 \usepackage{catchfile}
 \usepackage{xstring}
 \usepackage{multicol}
@@ -141,9 +139,9 @@
   % -- If first letter is "J", use custom lettrine settings; otherwise use default:
   % Original settings: 0.21 on J and 0.3 on the rest
   \IfStrEq{\firstletter}{J}{%
-    \lettrine[loversize=0.21, lines=3, lraise=0.22]{\firstletter}{\MakeUppercase{\firstword}} \remainingtext
+    \lettrine[loversize=0.21, lines=3, lraise=0.22]{\firstletter}{\textsc{\firstword}} \remainingtext
   }{%
-    \lettrine[loversize=0.3, lines=3, lraise=0.01]{\firstletter}{\MakeUppercase{\firstword}} \remainingtext
+    \lettrine[loversize=0.3, lines=3, lraise=0.01]{\firstletter}{\textsc{\firstword}} \remainingtext
   }%
   \par
   \vspace{1cm}
@@ -174,5 +172,5 @@
     left=3cm,
     right=3cm,
   }
-  \renewcommand{\normalsize}{\fontsize{13pt}{16pt}\selectfont}
+  \renewcommand{\normalsize}{\fontsize{13pt}{15.2pt}\selectfont}
 \fi
