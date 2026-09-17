@@ -1,15 +1,610 @@
-\input{preamble}
+\documentclass[twoside]{article} % OPTIMERING: twoside => inre marginal växlar sida vid dubbelsidig utskrift (byt tillbaka till oneside för skärmläsning)
+\usepackage[protrusion=true,expansion=false]{microtype}
+\usepackage{titlesec}
+\usepackage{setspace}
+\input{installningar} % gemensamma inställningar
+% Formatet (A4 eller BOK) väljs i format_aktiv.tex och skriver över måtten.
+% Byt med:  python3 satt.py --format A4   respektive  --format BOK
+\InputIfFileExists{format_aktiv}{}{\def\SRBformat{A4}}
+\input{format/\SRBformat}
+\usepackage{geometry}
+\usepackage{lettrine}
+\usepackage{fontspec}
+\usepackage{polyglossia}        % Swedish hyphenation patterns
+\setmainlanguage{swedish}
+\usepackage{catchfile}
+\usepackage{xstring}
+\usepackage{multicol}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage[table,xcdraw,svgnames]{xcolor}
+\usepackage{pagecolor}
+\usepackage{changepage}    % Fix for microtype (XeTeX limitation) % Add changepage package for adjustwidth
+\usepackage[               % --- Hyperref (for clickable links in TOC) ---
+    bookmarks=true,
+    colorlinks=true,       % or false if you don't want colored links
+    linkcolor=titlecolor,  % color of links
+    urlcolor=titlecolor,
+    citecolor=titlecolor
+]{hyperref}
+
+%%%%%%%%%
+%%% NOTERA ATT DU KAN ANVÄNDA BIBEL FLÄRPAR TILL ATT NAVIGERA DIN BIBEL SOM EJ HA VERSNUMMER
+%%% JAG HAR JÄMNFÖRT STORLEKET PÅ TYPSNITTET I SRB BIBELN OCH 
+%%% MIN EGNA UTSKRIVNA VERSION. MELLANRUMMET MELLAN MENINGARNA ÄR LIKA STORT SOM TYPSNITTET SJÄLVT. SÅ OM DETTA MINIMERAS SÅ BORDE MAN FÅ NER ANTALET SIDOR REJÄLT.
+
+% KALKYLERINGAR AV SIDOR
+% 2231-334 => page size chaning from 1.15 to 1.0 setstretch
+% 2231-379.27 => Changing to font size 12 (2231-1851.73 = 379.27)
+%% => 379.27
+% 2231 -(334 + 379.27) => 1517.73
+%%% 1517.73*0.6875=1043 SIDOR
+% 1043 / 2 om man har dubbelsidor, detta kräver dock tjocktpapper
+
+%%% TYPSNITT SOM SER BRA UT :   font-family: 'Averia Serif Libre', cursive;
+% \input{preamble}
+
+\usepackage{ragged2e}
+\justifying  % Makes all text justified by default
+
+% -- DEV AREA --
+\newcommand{\outlineonlysection}[1]{%
+  \section*{}% nothing shows in PDF
+  \section{#1}% temporarily uncomment to get outline entry
+}
+
+% -- Define Colors -- (\sub)
+\definecolor{oldpaper}{RGB}{250, 240, 210} % antique yellowish-orange background
+\definecolor{oldpaper}{gray}{\SRBbakgrund}
+\definecolor{textcolor}{gray}{\SRBtextton}
+\definecolor{titlecolor}{gray}{\SRBrubrikton}
+% Feature colors and commands — auto-generated from usx_config.json
+\input{srb_config}
+% V3: mörkare grå för tilläggsord — mitt emellan (128,125,114) och (105,100,90)
+\definecolor{addedtext}{gray}{\SRBtillaggston}
+\definecolor{srbnotmark}{gray}{\SRBsuperGray}
+\definecolor{versnummerfarg}{gray}{\SRBsuperGray}
+
+% Apply it to TOC page numbers
+\definecolor{TOCPageNumber}{gray}{\SRBrubrikton}
+
+\renewcommand{\cftsecpagefont}{\color{TOCPageNumber}}
+\renewcommand{\cftsubsecpagefont}{\color{TOCPageNumber}}
+\renewcommand{\cftsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+
+% For bold on the TOC chapter dividers
+\renewcommand{\cftsecfont}{\bfseries}
+\renewcommand{\cftsecpagefont}{\bfseries}
+\renewcommand{\cftsecfont}{\bfseries\color{titlecolor}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{TOCPageNumber}}
+\renewcommand{\cftsubsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+
+% --- Backwards button
+\newcommand{\backtotoc}{%
+  \vspace{2em}
+  {\centering \fontsize{12.2}{12.2} \selectfont \hyperlink{TOC}{\color{titlecolor} Tillbaka }\par}
+}
+
+% -- Font Settings --
+\setmainfont[Path=fonts/, Extension=.ttf,
+  UprightFont=EBGaramond-Regular, BoldFont=EBGaramond-Bold,
+  ItalicFont=EBGaramond-It, BoldItalicFont=EBGaramond-BoldIt,
+  Numbers=\SRBsiffror, LetterSpace=-2.2, UprightFeatures={FakeBold=\SRBfetning}]{EBGaramond} % V10: FakeBold=1.4 — tyngre sättning (1.0 lättare, 1.8 max)
+
+
+% -- Page Color & Text Color --
+\pagecolor{oldpaper}
+\color{textcolor}
+
+% Font Size, indent, paragraph spacing (geometry is set in the mobile/print block below)
+\setlength{\parindent}{\SRBindrag}
+\setlength{\parskip}{0em}
+
+% Prevent orphan lines (single line at bottom) and widow lines (single line at top)
+\widowpenalty=\SRBankor
+\clubpenalty=\SRBankor
+
+\setstretch{1.0} % OPTIMERING: 1.0 (radavståndet styrs nu exakt av \fontsize ovan)
+% OPTIMERING: \sloppy ersatt — ger tätare ordmellanrum = fler tecken per rad
+\tolerance=\SRBtolerance
+\emergencystretch=1.5em
+\hyphenpenalty=75
+
+% -- Title Formatting --
+%\titleformat{\section}{\centering\Huge\bfseries\color{titlecolor}\scshape}{\thesection}{1em}{}
+
+%\titleformat{\subsection}{\centering\Large\bfseries\itshape\color{titlecolor}}{\thesubsection}{1em}{}
+
+\titleformat{\subsection}{\centering\Large\bfseries\color{black}}{\thesubsection}{1em}{}
+% OPTIMERING: titlesec:s standardluft runt rubriker är enorm — dra åt den
+\titlespacing*{\subsection}{0pt}{0.15ex plus 0.1ex}{0.05ex}
+\titlespacing*{\section}{0pt}{0.5ex}{0.1ex}
+
+
+% --- FOTNOTER OCH KORSHÄNVISNINGAR ---
+% Textfilerna innehåller alltid \srbnote{...} (TR/UN-varianter) och
+% \srbxref{...} (parallellställen). Här avgörs bara om de VISAS.
+% Makrona är \protected så att xstring inte expanderar innehållet när
+% kapitlets första bokstav plockas ut för anfangen.
+\protected\long\def\srbnote#1{\ifnum\SRBfotnoter=1 \footnote{\normalfont #1}\fi}
+\protected\long\def\srbxref#1{\ifnum\SRBkorshanvisningar=1 \footnote{\normalfont\small #1}\fi}
+
+% --- VERSNUMMER ---
+% Numren finns ALLTID i textfilerna. Om de visas styrs av installningar.tex.
+% Versnumret har NOLLBREDD och kostar därför inga sidor. Det skjuts åt
+% vänster in i ordmellanrummet före versen och lyfts upp, så att det inte
+% lägger sig ovanpå ordet efter. Justeras med SRBversnummerVanster/Lyft.
+% V26: källtexten skriver alltid "\versenumber{N}~Ord" - dvs ett hårt
+% mellanslag (~) kommer OMEDELBART efter. Lägg därför INGEN egen \hspace
+% här, annars blir det dubbla mellanrum. Numret är grått, som tilläggsorden.
+% V27: INGEN fast bredd på numret. En fast högerställd ruta gjorde att
+% breda tal (särskilt tvåsiffriga) svämmade över åt VÄNSTER och åt upp det
+% mellanslag som redan finns i källtexten före numret - då såg det ut som
+% om numret satt klistrat vid föregående ord/skiljetecken. Nu får numret
+% sin naturliga bredd, med en liten egen luft på var sida (kan vara 0).
+% V29: mellanrummet EFTER numret styrs helt av OSS (\srbvsp), inte av
+% källtextens "~" (hårt mellanslag). Polyglossias svenska språkstöd ger "~"
+% ett mellanrum som är ungefär DUBBELT så brett som ett vanligt ordmellanrum
+% - synligt som glapp runt varenda versnummer. \srbvsp har en känd,
+% kontrollerad bredd oavsett språkinställningar.
+% V29c: numret + luften på båda sidor byggs som EN stel \hbox. Fristående
+% \hspace/\kern mellan ord kan annars fångas upp av radens marginaljustering
+% och sträckas olika mycket beroende på hur mycket den enskilda raden behöver
+% fyllas ut - det gav oförutsägbart varierande glapp som inte gick att
+% justera bort genom att bara ändra längden. En hbox är stel: dess innehåll
+% påverkas aldrig av omgivande radjustering.
+% \SRBgrad är TEXT ("8.3pt"), inte ett dimensionsregister - därför kan man
+% inte skriva 0.6\SRBgrad. Vi lägger värdet i ett riktigt register först.
+\newdimen\srbGradDim
+\AtBeginDocument{\srbGradDim=\SRBgrad}
+\newcommand{\srbVerseShow}[1]{%
+  % V37: storlek och lyft är PROPORTIONELLA mot brödtexten (\SRBgrad), inte
+  % absoluta. Tidigare var lyftet angivet i "ex", vilket mäts i den OMGIVANDE
+  % fonten - vid liten brödtext blev lyftet därför så stort att siffran
+  % hamnade uppe vid raden OVANFÖR och såg ut att höra dit.
+  %   storlek = SRBversnummerAndel  × brödtextens grad  (typiskt 0.60)
+  %   lyft    = SRBversnummerLyftAndel × brödtextens grad (typiskt 0.34)
+  % \smash nollar boxens höjd/djup så att den upphöjda siffran inte ökar
+  % radavståndet - annars kostar versnumren ~160 sidor i hela bibeln.
+  \leavevmode\hbox{\kern\SRBversnummerVanster
+    \smash{\raisebox{\SRBversnummerLyftAndel\srbGradDim}{%
+      \textcolor{versnummerfarg}{%
+        \fontsize{\SRBversnummerAndel\srbGradDim}{\SRBversnummerAndel\srbGradDim}%
+        \addfontfeatures{Numbers=Lining}\selectfont #1}}}%
+    \kern\SRBversnummerHoger}%
+}
+
+% V29b: RIGID mellanrum (utan plus/minus). Elastiskt \hspace deltar annars i
+% radens marginaljustering och kan svälja en oproportionerligt stor del av
+% radens sträckning - det var den verkliga orsaken till de ojämna glappen,
+% inte längden vi angav.
+% V38: \ignorespaces äter upp källtextens mellanslag efter numret. Det
+% mellanslaget är ELASTISKT och sträcks av marginaljusteringen, vilket gjorde
+% att avståndet mellan siffra och ord varierade kraftigt från rad till rad.
+% Nu styr enbart vår egen fasta \kern (SRBversnummerHoger) - lika på alla rader.
+\newcommand{\srbvsp}{\ignorespaces}
+% Gör det gamla "~" (om det finns kvar i källtexten) till samma stela
+% mellanrum som \srbvsp - annars sträcks det olika av radjusteringen.
+\catcode`\~=13
+\def~{\srbvsp}
+\protected\def\versenumber#1{\ifnum\SRBversnummer=1 \srbVerseShow{#1}\fi}
+  \ExplSyntaxOn
+\NewDocumentCommand{\RenderVersesFromTextFile}{mm}
+ {
+   \section*{#2}
+   \phantomsection\addcontentsline{toc}{section}{#2}
+   \setcounter{verse}{0} % V3 BUGFIX: räknaren skapas en gång i preamblen, nollställs här
+   \ior_open:Nn \l_tmpa_ior {#1}
+   \ior_map_inline:Nn \l_tmpa_ior
+    {
+      \stepcounter{verse}
+      \versenumber{\theverse}~##1\ %
+    }
+   \ior_close:N \l_tmpa_ior
+   \par\vspace{0.15cm} % OPTIMERING, default 0.15cm
+ }
+\ExplSyntaxOff
+
+\newcommand{\ProcessAndRenderFile}[3][]{%
+  % 1) Read the entire file into \temptext
+  \CatchFileDef{\temptext}{#2}{}%
+  % 2) Extract the very first letter
+  \StrLeft{\temptext}{1}[\firstletter]%
+  % 3) Remove that first letter from the text
+  \StrGobbleLeft{\temptext}{1}[\resttemp]%
+  % 4) Split \resttemp into first word + remainder
+  \StrBefore{\resttemp}{ }[\firstword]%
+  \StrBehind{\resttemp}{ }[\remainingtext]%
+  % -- Add entry to the TOC using the optional argument if provided;
+  %    otherwise, fallback to the heading text (#3):
+  \phantomsection
+  \addcontentsline{toc}{subsection}{\ifx&#1&\relax\protect\mbox{#3}\else\protect\mbox{#1}\fi}%
+  % -- Print the actual heading in the document as HUGE with line breaks, etc.:
+  % V14: ett kapitel får inte börja så nära sidfoten att anfangen hänger ned
+  % i notzonen. Kräver plats för rubrik + anfangens höjd innan brytning.
+  \Needspace*{\SRBkapitelminplats\baselineskip}%
+  \InsertMark{srbch}{#3}%
+  \InsertMark{srbbok}{\srbCurrentBook}% V17: boknamnet, för sidfoten
+  \InsertMark{srbnr}{\srbCurrentNr}%   V17: kapitelnumret, för sidfoten
+  % V31: rubrikstil styrs av SRBrubrikstil (installningar.tex). Sex alternativ:
+  %   kursiv   = standard, som tidigare
+  %   sparrad  = upprätt fet, breddad bokstavsspärrning
+  %   linjer   = upprätt fet, tunna linjer på var sida
+  %   ram      = upprätt fet, inramad
+  %   initial  = stor accentfärgad förstabokstav, resten upprätt kapitäler
+  %   tunn     = upprätt, VANLIG vikt (ej fet), mycket breddad spärrning - luftig
+  \def\srbRubTxt{\addfontfeatures{Numbers=Lining}\MakeUppercase{#3}}
+  \ifx\SRBrubrikstil\srbRubrikSparrad
+    \subsection*{\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning}\bfseries\addfontfeatures{LetterSpace=-2.2}\srbRubTxt}%
+  \else\ifx\SRBrubrikstil\srbRubrikLinjer
+    \subsection*{%
+      \noindent\hbox to 0.14\linewidth{\leaders\hrule height 0.5pt\hfil}\hspace{0.8em}%
+      {\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning}\bfseries\srbRubTxt}\hspace{0.8em}%
+      \hbox to 0.14\linewidth{\leaders\hrule height 0.5pt\hfil}}%
+  \else\ifx\SRBrubrikstil\srbRubrikRam
+    \subsection*{\centering
+      \fboxsep6pt\fbox{\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning}\bfseries\srbRubTxt}}%
+  \else\ifx\SRBrubrikstil\srbRubrikInitial
+    \subsection*{%
+      {\fontsize{28pt}{28pt}\selectfont\bfseries\color{titlecolor}\MakeUppercase{\srbHeadFirstLetter{#3}}}%
+      {\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning}\bfseries\addfontfeatures{Numbers=Lining,LetterSpace=-2.2}\MakeUppercase{\srbHeadRestLetters{#3}}}}%
+  \else\ifx\SRBrubrikstil\srbRubrikTunn
+    \subsection*{\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning}\addfontfeatures{LetterSpace=-2.2}\srbRubTxt}%
+  \else
+    \subsection*{\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning}\itshape\srbRubTxt}%
+  \fi\fi\fi\fi\fi
+  
+  % -- If first letter is "J", use custom lettrine settings; otherwise use default:
+  % Original settings: 0.21 on J and 0.3 on the rest
+  % V12: anfangens inställningar väljs FÖRST; texten placeras utanför \IfStrEq
+  % (xstring-argument är korta och tål inte \par från styckebrytningen)
+  \IfStrEq{\firstletter}{J}%
+    {\def\srbLettOpt{loversize=\SRBanfangJ, lines=\SRBanfangrader, lraise=\SRBanfangJlyft}}%
+    {\def\srbLettOpt{loversize=\SRBanfangOvriga, lines=\SRBanfangrader, lraise=\SRBanfangOvrigalyft}}%
+  \expandafter\lettrine\expandafter[\srbLettOpt]{\firstletter}{\srbFirstWord{\firstword}} \remainingtext
+  \par
+  \vspace{\SRBkapitelluft}
+  % \backtotoc % TILLBAKA-KNAPPEN FINNS HÄR
+}
+
+%--- TOC Invisible sections ---
+\newcommand{\invisiblesection}[1]{%
+  \InsertMark{srbch}{}% V3: nollställ kapitelmärke vid bokgräns
+  \par
+  % V5: ny bok får ny sida BARA om mindre än 8 cm återstår på sidan;
+  % annars fortsätter den på samma sida efter ett mellanrum (som tryckta biblar gör).
+  % Det tar bort de nästan tomma bokslutssidorna (~26 sidor rent vitt i v4).
+  \ifdim\pagetotal>0pt
+    \ifdim\dimexpr\pagegoal-\pagetotal\relax<\SRBnybokgrans
+      \clearpage
+    \else
+      \vspace{\SRBbokluft}%
+    \fi
+  \fi
+  \stepcounter{bookindex}%
+  \srbRecordBook % V9: registrera bokens startsida
+  \phantomsection
+  \addcontentsline{toc}{section}{\textbf{#1}}%
+}
+% NEW STUFF CAN BE REMOVED.
+% Uncomment this line to enable mobile formatting
+\newif\ifmobilelayout
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% =======>>>>>>> MOBILE VERSION ACTIVATE HERE
+\mobilelayoutfalse
+
+\ifmobilelayout
+  \geometry{
+    paperwidth=4in,
+    paperheight=7in,
+    top=0.5cm,
+    bottom=0.5cm,
+    left=0.6cm,
+    right=0.6cm
+  }
+  \renewcommand{\normalsize}{\fontsize{15pt}{20pt}\selectfont}
+\else
+  \geometry{
+    paperwidth=\SRBpappersbredd,
+    paperheight=\SRBpappershojd,
+    top=\SRBover,
+    bottom=\SRBunder,
+    footskip=\SRBfotavstand,
+    inner=\SRBinner,
+    outer=\SRBytter,
+  }
+  \renewcommand{\normalsize}{\fontsize{\SRBgrad}{\SRBradavstand}\selectfont}
+  % DEFAULT: \renewcommand{\normalsize}{\fontsize{12.55pt}{18pt}\selectfont}
+  % OTHER SET: \renewcommand{\normalsize}{\fontsize{12pt}{17.8pt}\selectfont}
+\fi
+
+% ── V3: SIDFOT MED KAPITEL + TRYCKT TUMINDEX ─────────────────────────
+\newcounter{verse}
+\newcounter{bookindex}
+
+% ── Hjälpmakron styrda av installningar.tex ──────────────────────────────
+% Anfangens första ord: kapitäler eller vanlig stil
+\ifnum\SRBanfangKapitaler=1
+  \newcommand{\srbFirstWord}[1]{\textsc{#1}}
+\else
+  \newcommand{\srbFirstWord}[1]{#1}
+\fi
+% Perikopmärke för sidfoten (fylls bara om perikoprubriker är på)
+\NewMarkClass{srbperikop}
+
+% ── Perikopmarkering: styrs helt av installningar.tex ────────────────────
+% USX-filerna innehåller \sechead{...} vid varje meningsenhet. Vad som händer
+% där bestäms av tre flaggor; alla noll => rubrikerna syns inte alls.
+\long\def\sechead#1{%
+  \ifnum\SRBsidfotPerikopMark=1 \InsertMark{srbperikop}{#1}\fi
+  \ifnum\SRBperikoprubriker=1
+    \par\vspace{0.35em}%
+    {\centering\small\itshape\color{titlecolor}#1\par}%
+    \vspace{0.2em}\noindent
+  \else
+    \ifnum\SRBstyckebrytning=1
+      \par % nytt stycke; indraget kommer från \parindent
+    \else
+      \ifnum\SRBstyckemarkor=1 {\color{addedtext}\P}\nobreakspace\fi
+    \fi
+  \fi}
+
+% Styckemarkör i grått, alternativ till verklig styckebrytning
+\newcommand{\srbPilcrow}{\ifnum\SRBstyckemarkor=1 {\color{addedtext}\P{}}\fi}
+
+\NewMarkClass{srbch}
+\NewMarkClass{srbbok}
+\NewMarkClass{srbnr}
+% V14: noterna sätts som ETT löpande stycke längst ned (para) i stället för
+% en not per rad. De hamnar direkt ovanför sidfoten och tar därför normalt
+% bara en rad i anspråk i stället för fem.
+\usepackage{needspace}
+\usepackage[para,flushmargin]{footmisc}
+\usepackage{perpage}
+\MakePerPage{footnote}
+\renewcommand{\footnotelayout}{\SRBnotstil}
+% V15: hänvisningssiffran — samma storlek och ton för fotnot och korshänvisning
+% V40: notmarkören (fotnot/korsref-siffran i löptexten) sätts nu i SAMMA
+% storlek som versnumret - båda är "hänvisningssiffror" och ska kännas ihop.
+\newcommand{\srbNoteMark}[1]{%
+  \textsuperscript{\color{srbnotmark}%
+    \fontsize{\SRBversnummerAndel\srbGradDim}{\SRBversnummerAndel\srbGradDim}\selectfont #1}}
+% V20: siffran i notblocket sätts fet när SRBnotmarkefet=1 — vid många noter
+% på samma sida blir det annars svårt att hitta rätt not.
+\newcommand{\srbNoteMarkFet}[1]{%
+  \textsuperscript{\color{srbnotmark}%
+    \fontsize{\SRBversnummerAndel\srbGradDim}{\SRBversnummerAndel\srbGradDim}\selectfont
+    \ifnum\SRBnotmarkefet=1 \bfseries\fi #1}}
+\makeatletter
+\renewcommand{\@makefnmark}{\srbNoteMark{\@thefnmark}}
+\renewcommand{\@makefntext}[1]{\srbNoteMarkFet{\@thefnmark}\,#1}
+\makeatother
+\renewcommand{\footnoterule}{\vspace{-2pt}\hrule width \SRBnotlinje height 0.3pt\vspace{2pt}}
+\setlength{\skip\footins}{\SRBnotavstand}
+\usepackage{fancyhdr}
+\usepackage{eso-pic}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\newcommand{\pnum}{{\fontsize{\SRBsidnummerstorlek}{\SRBsidnummerstorlek}\selectfont\thepage}}
+\ifnum\SRBsidnummerTopp=1\fancyhead[LE]{\pnum}\fi % V4: sidnummer även i övre ytterhörn
+\ifnum\SRBsidnummerTopp=1\fancyhead[RO]{\pnum}\fi
+
+% V17: sidnumret sitter i YTTERMARGINALEN, lodrätt mitt på sidan.
+% Sidhuvudet låg utanför papperet och klipptes; överkanten är dessutom
+% upptagen av textens första rad. Mitt på sidan är marginalen helt tom.
+\AddToShipoutPictureFG{%
+  \ifnum\SRBsidnummerMarginal=1
+    \begingroup
+    \setlength{\unitlength}{1mm}%
+    \edef\srbPnY{\fpeval{\SRBpappershojdMM/2}}%
+    \ifodd\value{page}%
+      \put(\fpeval{\SRBpappersbreddMM-\SRBsidnummerKant},\srbPnY){\makebox(0,0)[c]{\srbMarginPnum}}%
+    \else
+      \put(\SRBsidnummerKant,\srbPnY){\makebox(0,0)[c]{\srbMarginPnum}}%
+    \fi
+    \endgroup
+  \fi}
+\newcommand{\srbMarginPnum}{{\fontsize{\SRBsidnummerMarginalstorlek}{\SRBsidnummerMarginalstorlek}\selectfont\thepage}}
+\setlength{\headheight}{18pt}
+\setlength{\headsep}{4pt}
+\ifnum\SRBsidnummerBotten=1\fancyfoot[C]{\pnum}\fi
+\ExplSyntaxOn
+\prg_generate_conditional_variant:Nnn \str_if_eq:nn { e n } { TF } % V3: en-varianten finns inte förgenererad
+% "tomt märke" = tom sträng eller kärnans \prg_do_nothing:
+\cs_new:Npn \chfblank:nTF #1#2#3 {
+  \str_if_eq:enTF {#1} {} {#2}
+    { \str_if_eq:enTF {#1} {\prg_do_nothing:} {#2} {#3} }
+}
+\cs_new:Npn \chfooterprint:n #1 { { \footnotesize \itshape #1 } }
+\cs_new:Npn \chfooterrange:nn #1#2 {
+  \chfblank:nTF {#1}
+    { \chfooterprint:n {#2} }
+    { \str_if_eq:eeTF {#1} {#2}
+        { \chfooterprint:n {#2} }
+        { \chfooterprint:n { #1 \, – \, #2 } } }
+}
+% V17: boknamnet EN gång följt av sidans kapitelintervall
+\cs_new:Npn \chfooterbookrange {
+  \chfblank:nTF { \LastMark{srbbok} } { }
+  {
+    \tl_set:Nx \l_tmpa_tl { \TopMark{srbnr} }
+    \tl_if_empty:NT \l_tmpa_tl { \tl_set:Nx \l_tmpa_tl { \FirstMark{srbnr} } }
+    \tl_set:Nx \l_tmpb_tl { \LastMark{srbnr} }
+    \chfooterprint:n {
+      \LastMark{srbbok} ~
+      \tl_if_eq:NNTF \l_tmpa_tl \l_tmpb_tl
+        { \tl_use:N \l_tmpb_tl }
+        { \tl_use:N \l_tmpa_tl – \tl_use:N \l_tmpb_tl }
+    }
+  }
+}
+\cs_new:Npn \chfooterchapters {
+  \chfblank:nTF { \LastMark{srbch} }
+    { \chfblank:nTF { \FirstMark{srbch} }
+        { \chfblank:nTF { \TopMark{srbch} } { }
+            { \chfooterprint:n { \TopMark{srbch} } } }
+        { \chfooterrange:nn { \TopMark{srbch} } { \FirstMark{srbch} } } }
+    { \chfblank:nTF { \TopMark{srbch} }
+        { \chfooterrange:nn { \FirstMark{srbch} } { \LastMark{srbch} } }
+        { \chfblank:nTF { \FirstMark{srbch} }
+            { \chfooterprint:n { \LastMark{srbch} } }
+            { \chfooterrange:nn { \TopMark{srbch} } { \LastMark{srbch} } } } }
+}
+\ExplSyntaxOff
+
+% Position i boken: "Kapitel 3 av 50"
+\makeatletter
+\newcommand{\srbPosition}{%
+  \ifnum\srbChapCount>0
+    {\footnotesize\itshape Kapitel~\srbCurrentChap\ av~\srbChapCount}%
+  \fi}
+\makeatother
+
+% Perikopnamn (kräver SRBperikoprubriker=1)
+\ExplSyntaxOn
+\cs_new:Npn \srbPerikop { \chfblank:nTF { \LastMark{srbperikop} } { }
+  { \chfooterprint:n { \LastMark{srbperikop} } } }
+\ExplSyntaxOff
+
+% Val av sidfotens ytterkant enligt installningar.tex
+\newcommand{\chfooter}{%
+  \ifnum\SRBsidfotEndastUtanRubrik=1
+    \ifnum\srbHeadingOnPage=1 \else \srbFooterPick \fi
+  \else \srbFooterPick \fi}
+\makeatletter
+\providecommand{\srbHeadingOnPage}{0}
+\makeatother
+\newcommand{\srbFooterPick}{%
+  \ifx\SRBsidfot\srbNameKapitel   \chfooterchapters \fi
+  \ifx\SRBsidfot\srbNameBokintervall \chfooterbookrange \fi
+  \ifx\SRBsidfot\srbNamePosition  \srbPosition     \fi
+  \ifx\SRBsidfot\srbNamePerikop   \srbPerikop      \fi}
+\def\srbNameKapitel{kapitel}\def\srbNameBokintervall{bokintervall}
+\def\srbRubrikKursiv{kursiv}\def\srbRubrikSparrad{sparrad}
+\def\srbRubrikLinjer{linjer}\def\srbRubrikRam{ram}
+\def\srbRubrikInitial{initial}\def\srbRubrikTunn{tunn}
+\def\srbNamePosition{position}
+\makeatletter
+\def\srbHeadFirst#1#2\@nil{#1}
+\def\srbHeadRest#1#2\@nil{#2}
+\newcommand{\srbHeadFirstLetter}[1]{\expandafter\srbHeadFirst#1\@nil}
+\newcommand{\srbHeadRestLetters}[1]{\expandafter\srbHeadRest#1\@nil}
+\makeatother
+\def\srbNamePerikop{perikop}\def\srbNameInget{inget}
+
+\fancyfoot[LE]{\chfooter}
+\fancyfoot[RO]{\chfooter}
+
+
+\makeatletter
+% ── V9: PROPORTIONELLT TUMINDEX ─────────────────────────────────────────
+% Fliken sitter på ytterkanten. Dess HÖJD är proportionell mot bokens längd
+% och dess LÄGE motsvarar bokens plats i bibeln. Stängd bok => framkanten
+% blir en ärlig karta: Psaltaren ett tjockt block, Obadja en tunn strimma.
+% Sex avdelningar skiljs åt av små luckor så att man kan träffa rätt på känn.
+%
+% Kräver TVÅ extra kompileringar: första passet mäter böckernas sidomfång
+% (skrivs till main.aux), andra ritar flikarna.
+
+\newcommand{\srbTopMargin}{\SRBtabover}   % mm ovanför första fliken
+\newcommand{\srbBotMargin}{\SRBtabunder}   % mm nedanför sista fliken
+\newcommand{\srbGap}{\SRBtablucka}        % mm lucka mellan avdelningarna
+\newcommand{\srbTabW}{\SRBtabbredd}         % mm flikbredd
+\newcommand{\srbMinH}{\SRBtabminhojd}       % mm minsta flikhöjd (annars syns korta böcker ej)
+
+% avdelning per bokindex: 1-5 Mos, 6-17 Hist, 18-22 Poet, 23-39 Prof, 40-44 Ev, 45-66 Brev
+\newcommand{\srbSection}[1]{%
+  \ifnum#1<6 0\else\ifnum#1<18 1\else\ifnum#1<23 2\else
+  \ifnum#1<40 3\else\ifnum#1<45 4\else 5\fi\fi\fi\fi\fi}
+
+% data från förra kompileringen
+\newcommand{\srbbookpage}[2]{\expandafter\gdef\csname srb@start@#1\endcsname{#2}}
+\newcommand{\srbtotal}[1]{\gdef\srb@total{#1}}
+\providecommand{\srb@total}{0}
+
+\newcommand{\srbStartOf}[1]{%
+  \ifcsname srb@start@#1\endcsname\csname srb@start@#1\endcsname\else 0\fi}
+
+\AddToShipoutPictureBG{%
+  \ifnum\SRBtumindex=1
+  \ifnum\srb@total>0
+  \ifnum\value{bookindex}>0
+    \begingroup
+    \setlength{\unitlength}{1mm}%
+    \edef\bkA{\srbStartOf{\the\value{bookindex}}}%
+    \edef\bkB{\srbStartOf{\the\numexpr\value{bookindex}+1\relax}}%
+    \ifnum\bkA>0
+      % slut på sista boken = sista sidan
+      \ifnum\bkB=0 \edef\bkB{\srb@total}\fi
+      % tillgänglig höjd minus luckorna mellan de sex avdelningarna
+      \edef\srbUsable{\fpeval{297-\srbTopMargin-\srbBotMargin-5*\srbGap}}%
+      \edef\srbY{\fpeval{\srbTopMargin + \srbGap*\srbSection{\the\value{bookindex}}
+                         + \srbUsable*(\bkA-1)/\srb@total}}%
+      % höjd i tiondels mm som heltal -> \ifnum är pålitligt
+      \edef\srbHt{\fpeval{round(\srbUsable*(\bkB-\bkA)/\srb@total*10,0)}}%
+      \ifnum\srbHt<16 \edef\srbHt{16}\fi % minst 1.6 mm, annars syns korta böcker inte
+      \edef\srbH{\fpeval{\srbHt/10}}%
+      \ifodd\value{page}%
+        \put(\fpeval{210-\srbTabW},\fpeval{297-\srbY-\srbH}){\textcolor{textcolor}{\rule{\srbTabW mm}{\srbH mm}}}%
+      \else
+        \put(0,\fpeval{297-\srbY-\srbH}){\textcolor{textcolor}{\rule{\srbTabW mm}{\srbH mm}}}%
+      \fi
+    \fi
+    \endgroup
+  \fi\fi\fi}
+
+% registrera var varje bok börjar, och hur många sidor boken har totalt
+\newcommand{\srbRecordBook}{%
+  \immediate\write\@auxout{\string\srbbookpage{\the\value{bookindex}}{\thepage}}}
+\AtEndDocument{\immediate\write\@auxout{\string\srbtotal{\thepage}}}
+\makeatother
+
+% ── V8: BOKTABELL — hela bibeln byggs av 66 rader i books.tex ────────────
+% \srbbook{USX-kod}{Svensk titel}{antal kapitel}
+% Kapitelfilerna hittas automatiskt: srb_bibeln/usx/<kod>/ch<NNN>.txt
+% Byt ut hela srb_bibeln/usx/-mappen -> inget annat behöver ändras.
+\newcommand{\srbSetChapCount}[1]{\gdef\srbChapCount{#1}}
+\providecommand{\srbChapCount}{0}\providecommand{\srbCurrentChap}{0}\providecommand{\srbCurrentBook}{}\providecommand{\srbCurrentNr}{0}
+\newcommand{\srbpad}[1]{\ifnum#1<10 00\else\ifnum#1<100 0\fi\fi\number#1}
+\newcommand{\srbchapter}[3]{%
+  \gdef\srbCurrentChap{#3}% aktuellt kapitelnummer
+  \edef\srbpath{srb_bibeln/usx/#1/ch\srbpad{#3}.txt}%
+  \IfFileExists{\srbpath}%
+    {\gdef\srbCurrentBook{#2}\gdef\srbCurrentNr{#3}%
+     \expandafter\ProcessAndRenderFile\expandafter{\srbpath}{#2 #3}}%
+    {\GenericWarning{}{SRB: saknad kapitelfil \srbpath}}%
+}
+\ExplSyntaxOn
+\NewDocumentCommand{\srbbook}{mmm}{
+  \invisiblesection{#2}
+  \srbSetChapCount{#3}   % för sidfotens "Kapitel 3 av 50"
+  \int_step_inline:nnn {1} {#3} { \srbchapter{#1}{#2}{##1} }
+}
+\ExplSyntaxOff
+\newcommand{\ntTitlePage}{\clearpage
+  \input{front-page/title_text_nya_testamentet}%
+  \input{front-page/icons_low_quality}\clearpage}
 
 % -----------------------
 % DOCUMENT START
 % -----------------------
+% V28: \frenchspacing måste sättas EFTER polyglossias språkinställning -
+% polyglossia återställer annars till \nonfrenchspacing när \setmainlanguage
+% körs. Det gav omväxlande enkla/dubbla mellanrum efter meningsslutande
+% punkt, särskilt runt versnummer eftersom en ny mening ofta börjar just där.
+\AtBeginDocument{\frenchspacing}
 \begin{document}
 
+% V18: hela förtexten (titelsidor, länkar, innehållsförteckning) kan hoppas
+% över vid provbyggen. Sätt SRBframsida{0} i installningar.tex.
+\ifnum\SRBframsida=1
 % Front-page: GT
 \input{front-page/title_text_gamla_testamentet}
 \input{front-page/icons_low_quality}
 \newpage
-
 
 % -- Links to external material --
 % --- TOC Quick Menu ---
@@ -25,29 +620,14 @@
 \setlength{\parskip}{1pt}
 
 \raggedright
-\begin{itemize}
-  \item \href[pdfnewwindow=true]{https://bibel.se/}{Bibel.se}
-  \item \href[pdfnewwindow=true]{https://drive.google.com/drive/folders/1N-suLiCB4gOavhUg04P0xGzSDlCSntgo}{Samlat~material~Google~Drive}
-  \item \href[pdfnewwindow=true]{https://bibel.se/wordpress/index.php/2022/01/18/oversatta-bibelbocker/}{SRB~Bibelböcker}
-  % -- Next column
-  \item \href[pdfnewwindow=true]{https://bibelonline.se/biblereader.php}{Bibelonline}
-  \item \href[pdfnewwindow=true]{https://bibel.se/wordpress/index.php/2022/01/22/bestalla-reformationsbibeln/}{Köp SRB-Bibeln}
-  \item \href[pdfnewwindow=true]{https://seriebibeln.com/kristna-serier}{Seriebibeln}
-  \item \href[pdfnewwindow=true]{https://www.biblecenter.se/files/Kan_man_lita_pa_Bibel_2000.pdf}{Lita~på~Bibel2K?}
-  \item \href[pdfnewwindow=true]{https://www.youtube.com/@reformationsbibeln9676/videos}{Ljudbibel}
-\end{itemize}
-\end{multicols}
-\end{center}
-\vspace{1em}
 
-\ifshowtoc
 \section*{Innehållsförteckning}
 % --- Produce a "nice" table of contents (clickable if using hyperref)
-\renewcommand{\contentsname}{\LARGE }
+\renewcommand{\contentsname}{\fontsize{\SRBrubrikAndel\srbGradDim}{\SRBrubrikAndel\srbGradDim}\selectfont\addfontfeatures{FakeBold=\SRBrubrikfetning} }
     \begin{multicols*}{2}
     \setlength{\columnseprule}{0pt}
     \setlength{\columnsep}{15pt}
-    \renewcommand{\cftsubsecafterpnum}{\vskip1pt} % small space between entries
+    \renewcommand{\cftsubsecafterpnum}{\vskip 1pt} % small space between entries
     \setlength{\cftbeforesecskip}{0pt}
     \setlength{\cftbeforesubsecskip}{1pt}
     \renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
@@ -60,14 +640,16 @@
     }
 \end{multicols*}
 \newpage
+
 \fi
 
-
 % ── Toggle here ─────────────────────────────────────────────────
-\input{render/preview}   % preview  (usx_config.json → preview)
-% \input{render/full}     % full Bible — comment line above, uncomment this
+% RENDERA HELA BIBELN:
 % ────────────────────────────────────────────────────────────────
+%\input{books}
+
+\srbbook{JON}{Jona}{4}
+
+
 
 \end{document}
-
-

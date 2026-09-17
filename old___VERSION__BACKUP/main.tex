@@ -1,0 +1,73 @@
+\input{preamble}
+
+% -----------------------
+% DOCUMENT START
+% -----------------------
+\begin{document}
+
+% Front-page: GT
+\input{front-page/title_text_gamla_testamentet}
+\input{front-page/icons_low_quality}
+\newpage
+
+
+% -- Links to external material --
+% --- TOC Quick Menu ---
+\noindent
+\begin{center}
+
+\vspace{5em}
+\section*{Länkar}
+
+\begin{multicols}{2}
+\setlength{\columnseprule}{0pt}
+\setlength{\columnsep}{5pt}
+\setlength{\parskip}{1pt}
+
+\raggedright
+\begin{itemize}
+  \item \href[pdfnewwindow=true]{https://bibel.se/}{Bibel.se}
+  \item \href[pdfnewwindow=true]{https://drive.google.com/drive/folders/1N-suLiCB4gOavhUg04P0xGzSDlCSntgo}{Samlat~material~Google~Drive}
+  \item \href[pdfnewwindow=true]{https://bibel.se/wordpress/index.php/2022/01/18/oversatta-bibelbocker/}{SRB~Bibelböcker}
+  % -- Next column
+  \item \href[pdfnewwindow=true]{https://bibelonline.se/biblereader.php}{Bibelonline}
+  \item \href[pdfnewwindow=true]{https://bibel.se/wordpress/index.php/2022/01/22/bestalla-reformationsbibeln/}{Köp SRB-Bibeln}
+  \item \href[pdfnewwindow=true]{https://seriebibeln.com/kristna-serier}{Seriebibeln}
+  \item \href[pdfnewwindow=true]{https://www.biblecenter.se/files/Kan_man_lita_pa_Bibel_2000.pdf}{Lita~på~Bibel2K?}
+  \item \href[pdfnewwindow=true]{https://www.youtube.com/@reformationsbibeln9676/videos}{Ljudbibel}
+\end{itemize}
+\end{multicols}
+\end{center}
+\vspace{1em}
+
+\ifshowtoc
+\section*{Innehållsförteckning}
+% --- Produce a "nice" table of contents (clickable if using hyperref)
+\renewcommand{\contentsname}{\LARGE }
+    \begin{multicols*}{2}
+    \setlength{\columnseprule}{0pt}
+    \setlength{\columnsep}{15pt}
+    \renewcommand{\cftsubsecafterpnum}{\vskip1pt} % small space between entries
+    \setlength{\cftbeforesecskip}{0pt}
+    \setlength{\cftbeforesubsecskip}{1pt}
+    \renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+    \renewcommand{\cftsubsecfont}{\normalfont}
+    \renewcommand{\cftsubsecleader}{\color{TOCPageNumber}\cftdotfill{\cftdotsep}}
+    {\fontsize{11.5pt}{11.5pt}\selectfont
+    \phantomsection
+    \hypertarget{TOC}{}
+    \tableofcontents
+    }
+\end{multicols*}
+\newpage
+\fi
+
+
+% ── Toggle here ─────────────────────────────────────────────────
+\input{render/preview}   % preview  (usx_config.json → preview)
+% \input{render/full}     % full Bible — comment line above, uncomment this
+% ────────────────────────────────────────────────────────────────
+
+\end{document}
+
+

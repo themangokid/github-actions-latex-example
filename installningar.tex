@@ -1,0 +1,133 @@
+% ═══════════════════════════════════════════════════════════════════════════
+%  INSTÄLLNINGAR — Reformationsbibeln SRB 2026
+%
+%  Allt som styr bokens utseende ligger i denna fil. main.tex innehåller
+%  bara logiken och ska normalt inte behöva ändras.
+%
+%  Efter ändring: kompilera om (xelatex main.tex, fyra gånger för hela bibeln).
+%  Ångra allt:    python3 versioner.py hamta <tagg>
+%  Alla val och sidkostnader finns beskrivna i PARAMETRAR.md
+% ═══════════════════════════════════════════════════════════════════════════
+
+
+% ── 1. TYPOGRAFI ──────────────────────────────────────────────────────────
+% Sidkostnad för hela bibeln inom parentes.
+
+\def\SRBgrad{10.5pt}          % teckenstorlek        (13pt ≈ −70 sidor, 15pt ≈ +70)
+\def\SRBradavstand{14pt}     % radavstånd           (±22 sidor per 0,4pt)
+\def\SRBfetning{1.26}        % FakeBold 0–1.8       (0 sidor — ändrar inte radbrytning)
+\def\SRBsiffror{OldStyle}   % OldStyle = gemena siffror, Lining = versala
+\def\SRBtolerance{3000}     % radbrytningens tolerans; högre = tätare ordmellanrum
+
+
+% ── 2. ANFANG (stora begynnelsebokstaven) ─────────────────────────────────
+
+\def\SRBanfangrader{2}      % antal rader hög      (3 ≈ +26 sidor, 1 ≈ −26)
+\def\SRBanfangJ{0.18}       % storlekjustering för bokstaven J
+\def\SRBanfangJlyft{0.15}
+\def\SRBanfangOvriga{0.25}  % storlekjustering för övriga bokstäver
+\def\SRBanfangOvrigalyft{0.01}
+\def\SRBanfangKapitaler{1}  % 1 = första ordet i kapitäler, 0 = vanlig stil
+
+
+% ── 3. TEXTENS STRUKTUR ───────────────────────────────────────────────────
+
+\def\SRBkapitelminplats{1}  % rader som minst måste rymmas innan en kapitelrubrik
+                            % (annars hänger anfangen ned i not- och sidfotszonen)
+\def\SRBkapitelluft{0.0cm} % mellanrum mellan kapitel   (±15 sidor per 0,1cm)
+\def\SRBbokluft{5mm}        % mellanrum mellan böcker på samma sida
+\def\SRBnybokgrans{0mm}    % ny bok får ny sida om mindre än detta återstår
+                            % sätt 300mm => alltid ny sida (≈ +25 sidor)
+                            % sätt 0mm   => aldrig ny sida
+\def\SRBankor{10000}        % 10000 = skydda mot änkor/horungar, 300 = tillåt
+\def\SRBindrag{0em}       % styckeindrag
+
+
+% ── 4. SIDLAYOUT — måtten sätts av format/A4.tex eller format/BOK.tex ─────────────────────────────────────────────────────
+% Sidkostnad: ~11 sidor per 2mm över/under, ~6 sidor per 2mm inner/ytter.
+
+% \def\SRBpappersbredd{210mm}   <- sätts av format/<FORMAT>.tex
+% \def\SRBpappersbreddMM{210}  % samma mått utan enhet (för sidnummer och tumindex)   <- sätts av format/<FORMAT>.tex
+% \def\SRBpappershojd{297mm}   <- sätts av format/<FORMAT>.tex
+% \def\SRBpappershojdMM{297}   <- sätts av format/<FORMAT>.tex
+% \def\SRBover{1mm}         % övermarginal   <- sätts av format/<FORMAT>.tex
+% \def\SRBunder{15mm}        % undermarginal   <- sätts av format/<FORMAT>.tex
+% \def\SRBinner{14mm}        % innermarginal (ryggsidan)   <- sätts av format/<FORMAT>.tex
+% \def\SRBytter{10mm}        % yttermarginal   <- sätts av format/<FORMAT>.tex
+% \def\SRBfotavstand{1.2cm}   % avstånd ned till sidfoten   <- sätts av format/<FORMAT>.tex
+
+
+% ── 5. SIDHUVUD OCH SIDFOT ────────────────────────────────────────────────
+
+\def\SRBsidnummerstorlek{11pt}
+\def\SRBsidnummerTopp{0}       % gammalt sidhuvud, av (numret klipptes vid kanten)
+\def\SRBsidnummerMarginal{}   % V17: sidnumret i yttermarginalen i stället
+% \def\SRBsidnummerKant{6.5}       % mm från papperets ytterkant   <- sätts av format/<FORMAT>.tex
+\def\SRBsidnummerMarginalstorlek{6pt} % sidnumrets storlek i marginalen
+\def\SRBsidnummerHojd{3}       % mm från papperets överkant (ovanför textblocket)
+\def\SRBsidnummerBotten{1}  % 1 = sidnummer centrerat nederst, 0 = av
+
+% Vad som står i sidfotens ytterkant:
+%   kapitel  = "Första Moseboken 12 – Första Moseboken 14"  (nuvarande)
+%   position = "Kapitel 3 av 50"
+%   perikop  = perikopens namn        (kräver SRBperikoprubriker=1)
+%   inget    = tomt
+\def\SRBsidfot{inget}
+\def\SRBsidfotEndastUtanRubrik{0}  % 1 = visa bara på sidor utan kapitelrubrik
+
+
+% ── 6. TUMINDEX ───────────────────────────────────────────────────────────
+
+\def\SRBframsida{0}         % 1 = titelsidor och innehållsförteckning med,
+                            % 0 = hoppa över dem (snabba provbyggen)
+\def\SRBtumindex{0}         % 1 = på, 0 = av
+\def\SRBtabbredd{9}         % mm flikbredd
+\def\SRBtabminhojd{1.6}     % mm minsta flikhöjd (så korta böcker syns)
+\def\SRBtablucka{3.2}       % mm lucka mellan de sex avdelningarna
+\def\SRBtabover{18}         % mm ovanför första fliken
+\def\SRBtabunder{16}        % mm nedanför sista fliken
+
+
+% ── 7. FÄRG ───────────────────────────────────────────────────────────────
+% Gråskala (0 = svart, 1 = vitt). Krävs för tryck — en tryckplåt.
+
+\def\SRBtextton{0}          % brödtext
+\def\SRBtillaggston{0.50}   % tilläggsord som ej finns i grundtexten
+                            % mörkare (0.38) syns bättre på gräddpapper
+\def\SRBrubrikstil{kursiv}  % kursiv eller sparrad (upprätt, breddad) - LÅST som standard
+\def\SRBrubrikAndel{1.05}    % V41: mycket mindre, kompakt - nästan brödtextens storlek
+\def\SRBrubrikfetning{0.4}   % V41: LITE bold - diskret tyngd, inte kraftig
+\def\SRBrubrikton{0.1}     % rubriker och innehållsförteckningens sidnummer
+\def\SRBbakgrund{1}         % sidbakgrund; 1 = vitt (papperet ger gräddtonen)
+
+
+% ── 8. INNEHÅLL SOM FINNS I TEXTEN MEN KAN DÖLJAS ────────────────────────
+% Allt nedan GENERERAS ALLTID ut i textfilerna. Här styrs bara om det VISAS.
+% usx_config.json behöver inte längre ändras.
+
+\def\SRBversnummer{1}          % versnummer i texten (0 sidor - \smash-tekniken gör dem gratis)
+\def\SRBversnummerAndel{0.46}     % versnumrets storlek som andel av brödtexten
+\def\SRBversnummerLyftAndel{0.45} % hur högt numret lyfts, andel av brödtexten
+\def\SRBversnummerstorlek{7.5pt}  % (används ej längre - kvar för bakåtkompat.)
+\def\SRBversnummerHoger{0.09em}   % liten luft EFTER numret, innan källans ~ (hårt mellanslag)
+\def\SRBversnummerVanster{-0.05em} % liten luft FÖRE numret, utöver källans egna mellanslag
+\def\SRBversnummerLyft{1.45ex}    % hur högt numret lyfts över raden
+
+% Noternas utseende. De sätts som ett löpande stycke längst ned på sidan,
+% direkt ovanför sidfoten, och tar därför normalt bara en rad.
+\def\SRBnotstil{\fontsize{8.8pt}{10pt}\selectfont}
+\def\SRBnotmarkestorlek{7pt} % hänvisningssiffrans storlek (samma för not och korsref)
+\def\SRBnotmarketon{0.30}    % hänvisningssiffrans gråton (var 0.45 — nu fylligare)
+\def\SRBnotmarkefet{1}       % 1 = fet siffra i notblocket    % hänvisningssiffrans gråton; högre = ljusare
+\def\SRBnotavstand{7pt}      % luft mellan brödtext och noter
+\def\SRBnotlinje{0.25\textwidth} % skiljelinjens längd
+\def\SRBfotnoter{1}            % TR/UN-varianter i sidfoten    (≈ +100–150 sidor)
+\def\SRBkorshanvisningar{0}    % parallellställen i sidfoten   (≈ +60–100 sidor)
+
+% Perikopbrytpunkterna: samma ställe i texten, tre olika sätt att visa det.
+\def\SRBperikoprubriker{0}     % rubrik i texten               (≈ +15–25 sidor)
+\def\SRBstyckebrytning{1}      % nytt stycke, ingen rubrik     (≈ +65 sidor, valt)
+\def\SRBstyckemarkor{0}        % grått ¶ utan styckebrytning   (0 sidor)
+\def\SRBsidfotPerikopMark{0}   % spara perikopnamn för sidfoten
+
+\def\SRBsuperGray{0.50}
